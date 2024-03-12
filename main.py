@@ -11,6 +11,9 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 prompt = """You are an entity recognizer where you have to recognize dates and the corresponding event as entity from the given txt file which is of a whatsapp chat export. The txt contains the date and time of when the chat messages were sent and the messages may also contain some date along with the event that is going to happen on that particular date. You are going to identify when an event is going to take place and which is that event from the messages.
 
 ----------------------
+Note:
+1. Output should also write the year along wiht the date
+2. Write the event briefly
 
 for example 1 the txt file will contain chats like this
 10/03/2024, 16:56 - Pratik: <Media omitted>
@@ -20,15 +23,11 @@ for example 1 the txt file will contain chats like this
 10/03/2024, 17:04 - Pramit gdsc tiu: Gotcha
 
 this is a chat between Pratik(X) and Pramit(Y), talking about events idea for xshot hackathon(A), having a party(B), xshot hackathon(C)
-consider only the last 500 messages from the txt file
-Generate the output in bullet points after ignoring the dates and times written as "10/03/2024, 17:03" on the left hand side of the dash("-") as
-
-15th March, 2024- Last date to submit A.
-16th March, 2024- X is busy and he will be B, The C is on that date.
+Generate the output after ignoring the dates and times written as "10/03/2024, 17:03" on the left hand side of the dash("-") as
 
 like
-15th March, 2024- Last date to submit idea for xshot hackathon.
-16th March, 2024- Pramit is busy and he will be having a party, The xshot hackathon is on that date.
+15th March, 2024- Last date to submit idea for xshot hackathon.\n
+16th March, 2024- Pramit is busy and he will be having a party, The xshot hackathon is on that date.\n
 
 -------------------
 
@@ -50,17 +49,12 @@ Please note:-
 
 
 this is a chat between Pratik(X) and Srinjani(Y), talking about events maths assignment(A), Chemistry assignment(B), Problem Solving Techniques Assignment(C)
-consider only the last 500 messages from the txt file
-Generate the output in bullet points after ignoring the dates and times written as "11/03/2024, 00:00" on the left hand side of the dash("-") as
-
-14th March, 2024- Last date to submit A.
-15th March, 2024- Deadline for B submission.
-23rd March, 2024- Deadline for C.
+Generate the output after ignoring the dates and times written as "11/03/2024, 00:00" on the left hand side of the dash("-") as
 
 like
-14th March, 2024- Last date to submit maths assignment.
-15th March, 2024- Deadline for Chemistry assignment submission.
-23rd March, 2024- Deadline for Problem Solving Techniques Assignment.
+14th March, 2024- Last date to submit maths assignment.\n
+15th March, 2024- Deadline for Chemistry assignment submission.\n
+23rd March, 2024- Deadline for Problem Solving Techniques Assignment.\n
 """
 
 
@@ -71,7 +65,6 @@ def generate_gemini_content(text, prompt):
     # Extracting dates and events from the generated text
     events = []
     for line in generated_text.split('\n'):
-        if line.startswith(""):
             date, event = line.split("-", 1)
             events.append({"date": date.strip(), "event": event.strip()})
     return json.dumps(events)
