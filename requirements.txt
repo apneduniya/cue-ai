@@ -2,5 +2,3 @@ streamlit
 google-generativeai
 python-dotenv
 gcsa
-webbrowser
-datetime
