@@ -1,13 +1,10 @@
 import streamlit as st
-import os
+import os, sys, json
 import google.generativeai as genai
 from dotenv import load_dotenv
-import json
 from gcsa.google_calendar import GoogleCalendar
 from gcsa.event import Event
 from datetime import datetime
-import os 
-import sys 
 
 load_dotenv()
 
@@ -129,8 +126,11 @@ def save_event_in_google_calendar(event_name: str, event_date: int, event_month:
 
     calendar.add_event(event)
 
-
-st.title("Date Recognizer")
+st.set_page_config(
+    page_title="ICue App",
+    page_icon="🗓️",
+)
+st.title("ICue Date and Events Recognizer")
 
 # File upload section
 uploaded_file = st.file_uploader("Upload your text document (.txt):", type="txt")
@@ -138,20 +138,22 @@ uploaded_file = st.file_uploader("Upload your text document (.txt):", type="txt"
 if uploaded_file is not None:
     try:
         text = uploaded_file.read().decode("utf-8")
-        st.success("Document uploaded successfully!")
+        st.success("Chats uploaded successfully!")
 
-        if st.button("Recognize Dates"):
-            st.write("Recognizing the events....")
-            events_json = generate_gemini_content(text, prompt)
-            # st.json(json.loads(events_json))
-
-            # Saving event in google calender
-            st.write('Saving events in google calendar....')
-            for event in json.loads(events_json):
-                save_event_in_google_calendar(event_name=event["event_title"], event_date=int(event["event_date"]), event_month=int(event["event_month"]), event_year=int(event["event_year"]))
-
+        if st.button("Recognize Events"):
+            with st.spinner("Recognizing the events...."):
+                events_json = generate_gemini_content(text, prompt)
             st.markdown("## Recognized Dates: ")
-            st.json(json.loads(events_json))
+            for event in json.loads(events_json):
+                st.write(event["event_title"],"-",event["event_date"],"/",event["event_month"],"/",event["event_year"])
+                # Saving events in google calender
+            with st.spinner("Saving events in Google calendar...."):
+                for event in json.loads(events_json):
+                    save_event_in_google_calendar(event_name=event["event_title"], event_date=int(event["event_date"]), event_month=int(event["event_month"]), event_year=int(event["event_year"]))
+            st.markdown("Events have been saved to your [Google Calendar](https://calendar.google.com)")
+            
+            #st.markdown("## Recognized Dates: ")
+            #st.json(json.loads(events_json))
 
 
     except UnicodeDecodeError:
@@ -164,7 +166,7 @@ position: fixed;
 left: 0;
 bottom: 0;
 width: 100%;
-background-color:transparent;
+background-color: #451571;
 color: #FFFFFF;
 text-align: center;
 }
